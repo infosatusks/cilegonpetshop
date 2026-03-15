@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cilegon Petshop v.1</title>
+    <link rel="icon" href="logo.jpg">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    colors: { primary: '#fa338e', secondary: '#ff66ad', dark: '#333', lightbg: '#f8fafc', grayborder: '#e5e7eb' },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    
+    <!-- External Libs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+        .hide { display: none !important; }
+        @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        .toast-show { animation: slideUp 0.3s ease-out forwards; }
+        ::-webkit-scrollbar { width: 8px; height: 8px;}
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fa338e; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .banner-zoom:hover img { transform: scale(1.05); }
+        .banner-zoom img { transition: transform 0.3s ease; }
+        /* Quill Editor overrides */
+        .ql-container { font-family: 'Poppins', sans-serif !important; min-height: 200px; }
+        .article-body h1, .article-body h2 { font-weight: bold; margin-bottom: 10px; }
+        .article-body p { margin-bottom: 15px; }
+        .article-body ul { list-style-type: disc; margin-left: 20px; }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-80 z-[9999] hide flex flex-col justify-center items-center">
+        <i class="fas fa-paw animate-bounce text-primary text-6xl"></i>
+        <p class="mt-4 font-semibold text-primary">Memproses Data...</p>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 rounded-full text-white font-semibold shadow-lg hide"></div>
+
+    <!-- FLOATING WA BUTTON -->
+    <a href="https://wa.me/6281234567890" target="_blank" class="fixed bottom-20 right-5 bg-green-500 text-white p-4 rounded-full shadow-xl hover:bg-green-600 transition z-50 flex items-center justify-center w-14 h-14" id="btn-wa">
+        <i class="fab fa-whatsapp text-3xl"></i>
+    </a>
+
+    <!-- ==============================================
+         VIEW 1: PUBLIC LANDING PAGE
+    =============================================== -->
+    <div id="view-public" class="flex-grow flex flex-col pb-0">
+        
+        <!-- Top Navbar -->
+        <nav class="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm relative">
+            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-2 cursor-pointer" onclick="app.showPublicView('home')">
+                    <img src="logo.png" alt="CilegonPet" class="h-10 object-contain" onerror="this.src='https://via.placeholder.com/150/fa338e/ffffff?text=Logo'">
+                </div>
+                
+                <!-- Menu Center (Desktop) -->
+                <div class="hidden md:flex items-center gap-6 font-medium text-gray-600">
+                    <a href="#" onclick="app.showPublicView('home')" class="hover:text-primary transition">Beranda</a>
+                    <a href="#" onclick="app.showPublicView('promo')" class="hover:text-primary transition">Promo</a>
+                    <a href="#" onclick="app.showPublicView('articles')" class="hover:text-primary transition">Artikel</a>
+                    <a href="#" onclick="app.showPublicView('about')" class="hover:text-primary transition">Tentang Kami</a>
+                </div>
+
+                <!-- Right Actions (Icons Only) -->
+                <div class="flex items-center gap-5 text-xl text-gray-600">
+                    <div class="relative">
+                        <button onclick="document.getElementById('search-dropdown').classList.toggle('hide')" class="hover:text-primary transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <div id="search-dropdown" class="absolute right-0 top-10 w-72 bg-white shadow-xl rounded-lg p-3 hide border border-gray-100 z-50">
+                            <input type="text" placeholder="Cari produk..." class="w-full bg-gray-100 p-2.5 rounded-lg outline-none text-sm focus:ring-2 focus:ring-primary" oninput="app.searchProducts(this.value)">
+                        </div>
+                    </div>
+                    
+                    <button class="hover:text-primary transition relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="absolute -top-1.5 -right-2 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                    </button>
+                    
+                    <button onclick="app.navigate('login')" class="hover:text-primary transition" title="CPanel Login">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Red Promo Bar -->
+            <div class="bg-red-50 text-center py-1.5 border-b border-red-100 cursor-pointer hover:bg-red-100 transition" onclick="app.showPublicView('promo')">
+                <span class="text-red-600 text-xs md:text-sm font-semibold" id="cms-PromoText">Diskon Spesial Hari Ini! Klik untuk lihat Promo ></span>
+            </div>
+            
+            <!-- Category Menu Bar (Only visible in home) -->
+            <div id="home-category-bar" class="container mx-auto px-4 py-2 hidden md:flex items-center gap-6 text-sm text-gray-600 font-medium overflow-x-auto whitespace-nowrap">
+                <a href="#" onclick="app.filterPublicProducts('Semua')" class="hover:text-primary text-primary border-b-2 border-primary pb-1"><i class="fas fa-bars mr-1"></i> Semua</a>
+                <a href="#" onclick="app.filterPublicProducts('Makanan Kucing')" class="hover:text-primary pb-1">Makanan Kucing</a>
+                <a href="#" onclick="app.filterPublicProducts('Makanan Anjing')" class="hover:text-primary pb-1">Makanan Anjing</a>
+                <a href="#" onclick="app.filterPublicProducts('Perlengkapan Hewan')" class="hover:text-primary pb-1">Perlengkapan</a>
+                <a href="#" onclick="app.filterPublicProducts('Klinik dan Obat-obatan')" class="hover:text-primary pb-1">Obat-obatan</a>
+            </div>
+        </nav>
+
+        <!-- ==========================================
+             PUBLIC: HOME VIEW
+        =========================================== -->
+        <div id="public-home-view" class="public-view flex-grow">
+            <!-- Main Banner & Hero -->
+            <section id="banners" class="container mx-auto px-4 mt-6">
+                <h1 id="cms-HeroTitle" class="text-2xl font-bold text-gray-800 mb-4 hidden md:block">Selamat Datang di Cilegon Petshop</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2 bg-white rounded-2xl overflow-hidden shadow-sm h-64 md:h-96 relative banner-zoom cursor-pointer group" onclick="app.showPublicView('promo')">
+                        <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=1000" class="w-full h-full object-cover" alt="Main Promo">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6">
+                            <div class="text-white transform translate-y-4 group-hover:translate-y-0 transition">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Kebutuhan Anabul Terlengkap!</h2>
+                                <p class="text-sm opacity-90">Belanja sekarang dan dapatkan gratis ongkir se-Cilegon.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-1 gap-4 md:h-96">
+                        <div class="bg-primary rounded-2xl overflow-hidden shadow-sm relative banner-zoom cursor-pointer">
+                            <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover opacity-60 mix-blend-multiply" alt="Promo 1">
+                            <div class="absolute inset-0 flex flex-col justify-center items-center text-white p-4 text-center">
+                                <span class="bg-white text-primary text-xs font-bold px-2 py-1 rounded mb-2">PROMO</span>
+                                <h3 class="font-bold text-lg leading-tight">Diskon 50% Makanan Kucing</h3>
+                            </div>
+                        </div>
+                        <div class="bg-blue-500 rounded-2xl overflow-hidden shadow-sm relative banner-zoom cursor-pointer">
+                            <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=500" class="w-full h-full object-cover opacity-60 mix-blend-multiply" alt="Promo 2">
+                            <div class="absolute inset-0 flex flex-col justify-center items-center text-white p-4 text-center">
+                                <i class="fas fa-stethoscope text-3xl mb-2"></i>
+                                <h3 class="font-bold text-lg leading-tight">Layanan Klinik & Vaksinasi</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product Grid Section -->
+            <section id="categories" class="container mx-auto px-4 py-10">
+                <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800" id="product-section-title">Semua Produk</h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" id="public-product-grid"></div>
+            </section>
+
+            <!-- Home Articles Preview Section -->
+            <section id="home-articles" class="container mx-auto px-4 py-8 mb-10">
+                <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800">Artikel & Tips Terbaru</h2>
+                    <button onclick="app.showPublicView('articles')" class="text-sm md:text-base font-medium text-primary hover:underline transition">
+                        Artikel Lainnya <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="home-articles-grid">
+                    <!-- Preview Articles injected here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ==========================================
+             PUBLIC: PROMO VIEW
+        =========================================== -->
+        <div id="public-promo-view" class="public-view flex-grow hide container mx-auto px-4 py-10 pb-16">
+            <h2 class="text-3xl font-bold text-primary mb-6"><i class="fas fa-tag mr-2"></i> Promo & Penawaran</h2>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-red-100 text-center">
+                <i class="fas fa-gift text-6xl text-red-500 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Flash Sale Mingguan!</h3>
+                <p class="text-gray-600 max-w-lg mx-auto mb-6">Nikmati potongan harga hingga 50% untuk produk makanan kucing pilihan dan diskon layanan grooming setiap akhir pekan.</p>
+                <button onclick="app.showPublicView('home')" class="bg-primary text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-secondary transition">Mulai Belanja</button>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             PUBLIC: ABOUT VIEW
+        =========================================== -->
+        <div id="public-about-view" class="public-view flex-grow hide container mx-auto px-4 py-10 pb-16">
+            <h2 class="text-3xl font-bold text-primary mb-6">Tentang Kami</h2>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-8 items-center">
+                <div class="w-full md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=800" class="rounded-xl shadow-md w-full" alt="Store Front">
+                </div>
+                <div class="w-full md:w-1/2">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800">Cilegon Petshop</h3>
+                    <p id="cms-AboutTextFull" class="text-gray-600 leading-relaxed mb-6">Cilegon Petshop adalah destinasi utama untuk segala kebutuhan hewan peliharaan Anda. Berdiri dengan dedikasi untuk kesejahteraan hewan peliharaan di Kota Cilegon.</p>
+                    <div class="flex items-center gap-3 text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <i class="fas fa-map-marker-alt text-primary text-2xl"></i>
+                        <div>
+                            <p class="font-bold">Alamat Toko</p>
+                            <p class="text-sm">Jl. Cilegon Raya No.1, Kota Cilegon, Banten</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             PUBLIC: ARTICLES LIST VIEW
+        =========================================== -->
+        <div id="public-articles-view" class="public-view flex-grow hide container mx-auto px-4 py-10 pb-16">
+            <h2 class="text-3xl font-bold text-primary mb-6"><i class="fas fa-newspaper mr-2"></i> Semua Artikel & Tips</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="public-articles-grid"></div>
+        </div>
+
+        <!-- ==========================================
+             PUBLIC: ARTICLE DETAIL VIEW
+        =========================================== -->
+        <div id="public-article-detail-view" class="public-view flex-grow hide container mx-auto px-4 py-10 max-w-4xl pb-16">
+            <button onclick="app.showPublicView('articles')" class="text-primary font-medium mb-6 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar Artikel</button>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4" id="art-detail-title">Judul Artikel</h1>
+                <p class="text-sm text-gray-500 mb-6"><i class="far fa-calendar-alt mr-1"></i> <span id="art-detail-date">Tanggal</span></p>
+                <img id="art-detail-img" src="" class="w-full max-h-96 object-cover rounded-xl mb-8 shadow-sm" alt="Cover">
+                <div class="article-body text-gray-700 leading-relaxed text-lg" id="art-detail-content"></div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             MODERN NEW FOOTER (Pink Background)
+        =========================================== -->
+        <footer class="bg-primary text-white mt-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+            <div class="container mx-auto px-6 py-12 md:py-16">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16">
+                    
+                    <!-- Left Section: Logo, Tagline, Button -->
+                    <div class="md:col-span-12 lg:col-span-5 flex flex-col items-start">
+                        <div class="flex items-center gap-3 mb-6 cursor-pointer" onclick="app.showPublicView('home')">
+                            <!-- Use a white filter or specific logo if needed, otherwise rely on alt text or CSS filters -->
+                            <img src="logo.png" alt="CilegonPet Logo" class="h-8 object-contain bg-white rounded-md p-1" onerror="this.src='https://via.placeholder.com/150/ffffff/fa338e?text=Logo'">
+                            <span class="font-bold text-2xl tracking-tight">CilegonPet.</span>
+                        </div>
+                        <h3 class="text-3xl md:text-4xl font-bold mb-8 leading-tight">Pusat Kebutuhan Anabul Terbaik & Terlengkap.</h3>
+                        <a href="https://wa.me/6281234567890" target="_blank" class="inline-flex items-center justify-between bg-white text-primary font-semibold py-2.5 pl-5 pr-2 rounded hover:bg-gray-100 transition-colors duration-300 shadow-md">
+                            Hubungi Kami
+                            <span class="bg-primary text-white w-9 h-9 rounded flex items-center justify-center ml-4">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Right Section: Columns -->
+                    <div class="md:col-span-12 lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
+                        
+                        <!-- Layanan -->
+                        <div>
+                            <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Layanan</h4>
+                            <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
+                                <li><a href="#" class="hover:text-white transition">Pet Food</a></li>
+                                <li><a href="#" class="hover:text-white transition">Aksesoris</a></li>
+                                <li><a href="#" class="hover:text-white transition">Grooming</a></li>
+                                <li><a href="#" class="hover:text-white transition">Klinik</a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Informasi -->
+                        <div>
+                            <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Informasi</h4>
+                            <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
+                                <li><a href="#" onclick="app.showPublicView('about')" class="hover:text-white transition">Tentang Kami</a></li>
+                                <li><a href="#" onclick="app.showPublicView('articles')" class="hover:text-white transition">Artikel & Blog</a></li>
+                                <li><a href="#" onclick="app.showPublicView('promo')" class="hover:text-white transition">Promo</a></li>
+                                <li><a href="#" class="hover:text-white transition">Lokasi</a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Kebijakan -->
+                        <div>
+                            <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Kebijakan</h4>
+                            <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
+                                <li><a href="#" class="hover:text-white transition">Cara Belanja</a></li>
+                                <li><a href="#" class="hover:text-white transition">Pengiriman</a></li>
+                                <li><a href="#" class="hover:text-white transition">Retur Produk</a></li>
+                                <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Connect / Social -->
+                        <div>
+                            <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Connect</h4>
+                            <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
+                                <li><a href="#" class="flex items-center gap-3 hover:text-white transition"><i class="fas fa-globe w-4 text-center"></i> Website</a></li>
+                                <li><a href="#" class="flex items-center gap-3 hover:text-white transition"><i class="fab fa-instagram w-4 text-center"></i> Instagram</a></li>
+                                <li><a href="https://wa.me/6281234567890" target="_blank" class="flex items-center gap-3 hover:text-white transition"><i class="fab fa-whatsapp w-4 text-center"></i> WhatsApp</a></li>
+                                <li><a href="#" class="flex items-center gap-3 hover:text-white transition"><i class="fab fa-tiktok w-4 text-center"></i> TikTok</a></li>
+                                <li><a href="#" class="flex items-center gap-3 hover:text-white transition"><i class="fas fa-shopping-bag w-4 text-center"></i> Shopee</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row -->
+                <div class="border-t border-pink-400 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-pink-200 font-medium gap-6">
+                    <div class="flex flex-wrap justify-center gap-6">
+                        <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                        <a href="#" class="hover:text-white transition">Terms of Use</a>
+                        <a href="#" class="hover:text-white transition">Cookie Consent</a>
+                    </div>
+                    <div class="text-center md:text-right">
+                        &copy; 2026 Cilegon Petshop Ltd. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ==============================================
+         VIEW 2: LOGIN PAGE (WITH BYPASS)
+    =============================================== -->
+    <div id="view-login" class="min-h-screen flex items-center justify-center bg-gray-100 hide relative">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 z-10">
+            <div class="text-center mb-8">
+                <img src="logo.png" onerror="this.src='https://via.placeholder.com/150/fa338e/ffffff?text=Logo'" alt="Logo" class="h-16 mx-auto mb-3 object-contain">
+                <h2 class="text-2xl font-bold text-gray-800 tracking-tight">CPanel Akses</h2>
+            </div>
+            
+            <button onclick="app.bypassLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-2 mb-6">
+                <i class="fas fa-rocket"></i> MASUK CPANEL (Bypass Admin)
+            </button>
+            
+            <div class="flex items-center mb-6">
+                <hr class="flex-grow border-gray-300">
+                <span class="px-3 text-xs text-gray-500 font-bold uppercase">Atau Login Manual</span>
+                <hr class="flex-grow border-gray-300">
+            </div>
+
+            <form onsubmit="app.login(event)">
+                <div class="mb-4 relative">
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="login-user" placeholder="Username" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-primary" required>
+                    </div>
+                </div>
+                <div class="mb-6 relative">
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                        <input type="password" id="login-pass" placeholder="Password" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:border-primary" required>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-2.5 rounded-lg font-bold hover:bg-secondary shadow transition">Login Manual</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button onclick="app.navigate('public')" class="text-gray-500 text-sm hover:text-primary transition"><i class="fas fa-arrow-left mr-1"></i> Kembali ke Toko</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================
+         VIEW 3: CPANEL / ADMIN DASHBOARD
+    =============================================== -->
+    <div id="view-admin" class="min-h-screen bg-gray-100 flex hide">
+        <aside id="sidebar" class="bg-white w-64 shadow-xl flex-shrink-0 transition-transform duration-300 fixed md:relative z-50 h-full transform -translate-x-full md:translate-x-0 border-r border-gray-200">
+            <div class="p-5 flex items-center justify-between border-b">
+                <img src="logo.png" onerror="this.src='https://via.placeholder.com/150/fa338e/ffffff?text=Logo'" class="h-8 object-contain">
+                <button class="md:hidden text-gray-500 hover:text-primary" onclick="app.toggleSidebar()"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-4 flex items-center gap-3 border-b bg-gray-50">
+                <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-sm"><i class="fas fa-user-shield"></i></div>
+                <div>
+                    <p class="font-bold text-sm text-gray-800" id="auth-name">Admin Name</p>
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-gray-200 text-gray-600 px-2 py-0.5 rounded-sm" id="auth-role">Role</span>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 overflow-y-auto h-[calc(100vh-150px)]">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-3">Transaksi</div>
+                <a href="#" onclick="app.loadModule('pos')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="pos"><i class="fas fa-cash-register w-5 text-center"></i> Input Penjualan</a>
+                <a href="#" onclick="app.loadModule('stock')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="stock"><i class="fas fa-boxes w-5 text-center"></i> Tambah Stok</a>
+                <a href="#" onclick="app.loadModule('expense')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="expense"><i class="fas fa-money-bill-wave w-5 text-center"></i> Pengeluaran</a>
+                
+                <div class="admin-only">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-6 px-3">Konten & Master Data</div>
+                    <a href="#" onclick="app.loadModule('products')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="products"><i class="fas fa-box w-5 text-center"></i> Data Produk</a>
+                    <a href="#" onclick="app.loadModule('articles')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="articles"><i class="fas fa-newspaper w-5 text-center"></i> Artikel / Blog</a>
+                    <a href="#" onclick="app.loadModule('cms')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="cms"><i class="fas fa-pager w-5 text-center"></i> Edit Landing Page</a>
+                    <a href="#" onclick="app.loadModule('users')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="users"><i class="fas fa-users w-5 text-center"></i> Manajemen User</a>
+                    
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 mt-6 px-3">Laporan</div>
+                    <a href="#" onclick="app.loadModule('rep-trx')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="rep-trx"><i class="fas fa-file-invoice-dollar w-5 text-center"></i> Transaksi</a>
+                    <a href="#" onclick="app.loadModule('rep-fin')" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-pink-50 hover:text-primary font-medium transition admin-menu" data-target="rep-fin"><i class="fas fa-chart-line w-5 text-center"></i> Keuangan</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-screen overflow-hidden">
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 lg:px-8 z-10 border-b border-gray-200">
+                <div class="flex items-center gap-4">
+                    <button class="text-gray-500 hover:text-primary md:hidden" onclick="app.toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+                    <h2 class="text-lg font-bold text-gray-800" id="module-title">Dashboard</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="app.navigate('public')" class="text-xs md:text-sm font-medium text-gray-600 hover:text-primary bg-gray-100 px-3 py-1.5 rounded-md transition"><i class="fas fa-store mr-1"></i> Lihat Toko</button>
+                    <button onclick="app.logout()" class="text-xs md:text-sm font-medium text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</button>
+                </div>
+            </header>
+            <div class="p-4 lg:p-8 overflow-y-auto flex-1 bg-gray-50" id="admin-content"></div>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwJXYpreWY7KbBnEpUxzdUOJkpb2JrIsItT-VknPTl0a2UufzqK2NQdoWVmzI2M-PhO/exec"; 
+        
+        const app = {
+            state: { user: null, data: { Users: [], Products: [], Sales: [], Stocks: [], Expenses: [], LandingCMS: {}, Articles: [] }, currentPublicCategory: 'Semua', quillInstance: null },
+            init: async function() { const loggedUser = localStorage.getItem('petshopUser'); if(loggedUser) this.state.user = JSON.parse(loggedUser); await this.fetchInitialData(); this.navigate(this.state.user ? 'admin' : 'public'); },
+            api: async function(action, payload) { this.showLoading(); try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); const result = await res.json(); this.hideLoading(); if(result.status === 'success') return result.data; else throw new Error(result.message); } catch(e) { this.hideLoading(); this.toast(e.message || "Error Jaringan", "error"); throw e; } },
+            fetchInitialData: async function() { try { const data = await this.api('getData', { sheets: ['Products', 'Users', 'Sales', 'Stocks', 'Expenses', 'Articles', 'LandingCMS'] }); this.state.data = Object.assign(this.state.data, data); } catch(e) { console.log(e); } },
+            showLoading: () => document.getElementById('loadingOverlay').classList.remove('hide'), hideLoading: () => document.getElementById('loadingOverlay').classList.add('hide'),
+            toast: function(msg, type="success") { const el = document.getElementById('toast'); el.textContent = msg; el.className = `fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 rounded-full text-white font-semibold shadow-lg toast-show ${type==='success' ? 'bg-green-500' : 'bg-red-500'}`; el.classList.remove('hide'); setTimeout(() => el.classList.add('hide'), 3000); },
+            navigate: function(view) { document.getElementById('view-public').classList.add('hide'); document.getElementById('view-login').classList.add('hide'); document.getElementById('view-admin').classList.add('hide'); document.getElementById('btn-wa').classList.add('hide'); if(view === 'public') { document.getElementById('view-public').classList.remove('hide'); document.getElementById('btn-wa').classList.remove('hide'); this.showPublicView('home'); this.syncCMS(); } else if(view === 'login') { document.getElementById('view-login').classList.remove('hide'); } else if(view === 'admin') { if(!this.state.user) return this.navigate('login'); document.getElementById('view-admin').classList.remove('hide'); this.setupAdminEnvironment(); this.loadModule('pos'); } },
+            formatRp: (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0),
+            
+            showPublicView: function(viewName) { 
+                document.querySelectorAll('.public-view').forEach(el => el.classList.add('hide')); 
+                document.getElementById('home-category-bar').classList.add('hide'); 
+                if(viewName === 'home') { 
+                    document.getElementById('public-home-view').classList.remove('hide'); 
+                    document.getElementById('home-category-bar').classList.remove('hide'); 
+                    document.getElementById('search-dropdown').classList.add('hide'); 
+                    this.filterPublicProducts('Semua'); 
+                    this.renderHomeArticles(); 
+                } else if(viewName === 'promo') { 
+                    document.getElementById('public-promo-view').classList.remove('hide'); 
+                } else if(viewName === 'about') { 
+                    document.getElementById('public-about-view').classList.remove('hide'); 
+                } else if(viewName === 'articles') { 
+                    document.getElementById('public-articles-view').classList.remove('hide'); 
+                    this.renderPublicArticles(); 
+                } 
+                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            },
+            syncCMS: function() { const cms = this.state.data.LandingCMS || {}; if(cms.HeroTitle) document.getElementById('cms-HeroTitle').innerText = cms.HeroTitle; if(cms.PromoText) document.getElementById('cms-PromoText').innerText = cms.PromoText + " Klik untuk lihat Promo >"; if(cms.AboutText) document.getElementById('cms-AboutTextFull').innerText = cms.AboutText; },
+            filterPublicProducts: function(category) { this.state.currentPublicCategory = category; document.getElementById('product-section-title').innerText = category === 'Semua' ? 'Produk Rekomendasi' : `Kategori: ${category}`; this.renderProductGrid(category, ''); },
+            searchProducts: function(query) { this.showPublicView('home'); document.getElementById('product-section-title').innerText = query ? `Hasil Pencarian: "${query}"` : 'Produk Rekomendasi'; this.renderProductGrid('Semua', query.toLowerCase()); },
+            renderProductGrid: function(category, searchQuery) { const grid = document.getElementById('public-product-grid'); grid.innerHTML = ''; let prods = this.state.data.Products || []; if(category !== 'Semua') prods = prods.filter(p => p.Category === category); if(searchQuery) prods = prods.filter(p => p.Name.toLowerCase().includes(searchQuery) || p.Category.toLowerCase().includes(searchQuery)); if(prods.length === 0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-gray-400 bg-white rounded-2xl border"><i class="fas fa-box-open text-6xl mb-4 text-gray-200"></i><p class="text-lg">Produk tidak ditemukan.</p></div>`; return; } prods.forEach(p => { const isOutOfStock = p.Qty <= 0; grid.innerHTML += `<div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg flex flex-col group relative ${isOutOfStock ? 'opacity-70' : ''}">${isOutOfStock ? '<div class="absolute top-2 right-2 bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded z-10">HABIS</div>' : ''}<div class="h-40 w-full p-4 flex items-center justify-center group-hover:bg-gray-50"><img src="${p.ImageURL||'https://via.placeholder.com/150'}" class="max-h-full mix-blend-multiply group-hover:scale-105 transition" alt="${p.Name}"></div><div class="p-3 flex flex-col flex-grow border-t border-gray-50"><h3 class="font-medium text-sm text-gray-800 line-clamp-2 mb-2">${p.Name}</h3><div class="mt-auto flex justify-between items-center"><span class="font-bold text-primary">${this.formatRp(p.HargaJual)}</span>${!isOutOfStock ? `<button class="w-8 h-8 rounded-full bg-pink-50 text-primary hover:bg-primary hover:text-white transition"><i class="fas fa-plus"></i></button>` : ''}</div></div></div>`; }); },
+            
+            renderHomeArticles: function() {
+                const grid = document.getElementById('home-articles-grid');
+                if(!grid) return;
+                grid.innerHTML = '';
+                const arts = this.state.data.Articles || [];
+                const recentArts = arts.slice(-3).reverse();
+                if(recentArts.length === 0) {
+                    grid.innerHTML = '<p class="col-span-full text-center py-8 text-gray-500">Belum ada artikel dipublikasikan.</p>';
+                    return;
+                }
+                recentArts.forEach(a => {
+                    grid.innerHTML += `<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition" onclick="app.readArticle('${a.ID}')"><img src="${a.ImageURL||'https://via.placeholder.com/400x200'}" class="w-full h-48 object-cover"><div class="p-5"><p class="text-[10px] text-gray-400 mb-2"><i class="far fa-calendar-alt"></i> ${new Date(a.Date).toLocaleDateString('id-ID')}</p><h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2">${a.Title}</h3><button class="text-primary text-sm font-medium hover:underline mt-2">Baca Selengkapnya -></button></div></div>`;
+                });
+            },
+
+            renderPublicArticles: function() { const grid = document.getElementById('public-articles-grid'); grid.innerHTML = ''; const arts = this.state.data.Articles || []; if(arts.length === 0) { grid.innerHTML = '<p class="col-span-full text-center py-10 text-gray-500">Belum ada artikel dipublikasikan.</p>'; return; } arts.forEach(a => { grid.innerHTML += `<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition" onclick="app.readArticle('${a.ID}')"><img src="${a.ImageURL||'https://via.placeholder.com/400x200'}" class="w-full h-48 object-cover"><div class="p-5"><p class="text-[10px] text-gray-400 mb-2"><i class="far fa-calendar-alt"></i> ${new Date(a.Date).toLocaleDateString('id-ID')}</p><h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2">${a.Title}</h3><button class="text-primary text-sm font-medium hover:underline mt-2">Baca Selengkapnya -></button></div></div>`; }); },
+            readArticle: function(id) { const a = this.state.data.Articles.find(x => x.ID === id); if(!a) return; document.getElementById('art-detail-title').innerText = a.Title; document.getElementById('art-detail-date').innerText = new Date(a.Date).toLocaleDateString('id-ID'); document.getElementById('art-detail-img').src = a.ImageURL || 'https://via.placeholder.com/800x400'; document.getElementById('art-detail-content').innerHTML = a.Content; this.showPublicView('article-detail'); },
+            
+            login: async function(e) { e.preventDefault(); try { const user = await this.api('login', { username: document.getElementById('login-user').value, password: document.getElementById('login-pass').value }); this.state.user = user; localStorage.setItem('petshopUser', JSON.stringify(user)); this.navigate('admin'); this.toast("Login Berhasil!"); } catch(err) { this.toast(err.message, "error"); } },
+            bypassLogin: function() { this.state.user = { Username: 'AdminBypass', Role: 'Admin' }; this.navigate('admin'); this.toast("Bypass Mode Aktif", "success"); },
+            logout: function() { this.state.user = null; localStorage.removeItem('petshopUser'); this.navigate('login'); },
+            setupAdminEnvironment: function() { document.getElementById('auth-name').innerText = this.state.user.Username; document.getElementById('auth-role').innerText = this.state.user.Role; document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hide', this.state.user.Role === 'Kasir')); },
+            toggleSidebar: function() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); },
+            loadModule: function(mod) { document.querySelectorAll('.admin-menu').forEach(el => { if(el.dataset.target === mod) { el.classList.add('bg-pink-50', 'text-primary'); el.classList.remove('text-gray-600'); } else { el.classList.remove('bg-pink-50', 'text-primary'); el.classList.add('text-gray-600'); } }); if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full'); const content = document.getElementById('admin-content'); if(this.state.user.Role === 'Kasir' && ['users', 'products', 'cms', 'rep-trx', 'rep-fin', 'articles'].includes(mod)) { content.innerHTML = `<div class="text-center py-20 text-red-500 bg-white rounded-xl shadow"><i class="fas fa-ban text-5xl mb-4"></i><h2 class="text-xl font-bold">Akses Ditolak</h2></div>`; return; } if(mod === 'pos') this.renderPOS(); else if(mod === 'stock') this.renderStock(); else if(mod === 'expense') this.renderExpense(); else if(mod === 'products') this.renderProducts(); else if(mod === 'users') this.renderUsers(); else if(mod === 'cms') this.renderCMS(); else if(mod === 'rep-trx') this.renderReportTrx(); else if(mod === 'rep-fin') this.renderReportFin(); else if(mod === 'articles') this.renderAdminArticles(); },
+            
+            renderAdminArticles: function() { document.getElementById('module-title').innerText = "Kelola Artikel & Blog"; let tbody = ''; (this.state.data.Articles||[]).forEach(a => { tbody += `<tr class="border-b"><td class="p-3"><img src="${a.ImageURL||'https://via.placeholder.com/50'}" class="w-12 h-10 object-cover rounded"></td><td class="p-3 font-medium">${a.Title}</td><td class="p-3 text-sm text-gray-500">${new Date(a.Date).toLocaleDateString('id-ID')}</td><td class="p-3 text-center"><button onclick="app.deleteData('Articles', '${a.ID}')" class="text-red-500 bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`; }); document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6"><h3 class="font-bold mb-4 text-gray-800">Tulis Artikel Baru</h3><form onsubmit="app.saveArticle(event)"><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label class="text-xs font-bold text-gray-600">Judul Artikel</label><input type="text" id="art-title" required class="w-full border p-2.5 rounded-lg outline-none focus:border-primary"></div><div><label class="text-xs font-bold text-gray-600">Upload Banner/Gambar</label><input type="file" id="art-img" accept="image/*" class="w-full border p-2 rounded-lg text-sm"></div></div><div class="mb-4"><label class="text-xs font-bold text-gray-600 mb-2 block">Isi Konten (Rich Text)</label><div id="quill-editor" class="bg-white rounded-b-lg"></div></div><button type="submit" class="bg-primary text-white py-2.5 px-6 rounded-lg font-bold hover:bg-secondary transition">Publikasikan Artikel</button></form></div><div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100"><h3 class="font-bold mb-4 text-gray-800">Daftar Artikel</h3><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-3 w-16">Img</th><th class="p-3">Judul</th><th class="p-3">Tanggal</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`; setTimeout(() => { this.state.quillInstance = new Quill('#quill-editor', { theme: 'snow', placeholder: 'Tulis isi artikel yang menarik di sini...', modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image'], ['clean'] ] } }); }, 50); },
+            saveArticle: async function(e) { e.preventDefault(); const content = this.state.quillInstance.root.innerHTML; if(content === '<p><br></p>') return this.toast("Isi artikel tidak boleh kosong", "error"); const fileInput = document.getElementById('art-img'); const payload = { title: document.getElementById('art-title').value, content: content }; if (fileInput.files.length > 0) { const reader = new FileReader(); reader.onload = async (ev) => { payload.imageBase64 = ev.target.result; payload.fileName = fileInput.files[0].name; payload.mimeType = fileInput.files[0].type; await this.sendArtSave(payload); }; reader.readAsDataURL(fileInput.files[0]); } else await this.sendArtSave(payload); },
+            sendArtSave: async function(payload) { try { await this.api('saveArticle', payload); this.toast("Artikel dipublikasikan!"); await this.fetchInitialData(); this.renderAdminArticles(); } catch(e) { this.toast(e.message, "error"); } },
+            
+            renderCMS: function() { document.getElementById('module-title').innerText = "Tampilan Depan (CMS)"; const cms = this.state.data.LandingCMS || {}; document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl shadow-sm border max-w-2xl mx-auto"><form onsubmit="app.saveCMS(event)"><div class="mb-4"><label class="block text-xs font-bold text-gray-600 mb-1">Teks Banner Utama</label><input type="text" id="cms-hero" class="w-full border p-2.5 rounded-lg outline-none focus:border-primary" value="${cms.HeroTitle||''}"></div><div class="mb-4"><label class="block text-xs font-bold text-gray-600 mb-1">Teks Flash Promo (Header Merah)</label><input type="text" id="cms-promo" class="w-full border p-2.5 rounded-lg outline-none focus:border-primary" value="${cms.PromoText||''}"></div><div class="mb-5"><label class="block text-xs font-bold text-gray-600 mb-1">Deskripsi Laman Tentang Kami</label><textarea id="cms-about" class="w-full border p-2.5 rounded-lg outline-none focus:border-primary" rows="4">${cms.AboutText||''}</textarea></div><button type="submit" class="bg-primary text-white py-3 px-4 rounded-lg w-full font-bold shadow hover:bg-secondary">Simpan Landing Page</button></form></div>`; },
+            saveCMS: async function(e) { e.preventDefault(); try { await this.api('saveCMS', { HeroTitle: document.getElementById('cms-hero').value, PromoText: document.getElementById('cms-promo').value, AboutText: document.getElementById('cms-about').value }); this.toast("Disimpan"); await this.fetchInitialData(); } catch(e) { this.toast(e.message, "error"); } },
+            
+            renderPOS: function() { document.getElementById('module-title').innerText = "Input Penjualan (POS)"; const prods = this.state.data.Products || []; const prodOpts = prods.filter(p => p.Qty > 0).map(p => `<option value="${p.Name}" data-price="${p.HargaJual}">${p.Name} - ${this.formatRp(p.HargaJual)}</option>`).join(''); document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl shadow border"><div class="grid grid-cols-2 gap-4 mb-6"><div><label class="text-xs font-bold text-gray-600">Tanggal</label><input type="date" id="pos-date" class="w-full border p-2 rounded" value="${new Date().toISOString().split('T')[0]}"></div><div><label class="text-xs font-bold text-gray-600">Pembeli</label><input type="text" id="pos-buyer" class="w-full border p-2 rounded" placeholder="Umum"></div></div><table class="w-full text-left border-collapse mb-4"><thead class="bg-gray-50 text-sm"><tr><th class="p-3 w-1/2">Produk</th><th class="p-3 w-24">Qty</th><th class="p-3 text-right">Harga</th><th class="p-3 text-right">Total</th><th class="p-3 text-center"><i class="fas fa-cog"></i></th></tr></thead><tbody id="pos-tbody">${this.getPOSRow(prodOpts)}</tbody></table><button onclick="app.addPOSRow()" class="text-primary border border-primary px-4 py-2 rounded text-sm mb-6"><i class="fas fa-plus"></i> Tambah Baris</button><div class="border-t pt-6 flex flex-col items-end w-full space-y-3"><div class="flex justify-between w-1/3"><span class="text-gray-600">Subtotal:</span> <span id="pos-subtotal" class="font-bold">Rp 0</span></div><div class="flex justify-between w-1/3 items-center"><span class="text-gray-600">Diskon (Rp):</span><input type="number" id="pos-discount" class="border p-1 w-32 text-right rounded" placeholder="0" oninput="app.calcPOSTotal()"></div><div class="flex justify-between w-1/3 text-lg text-primary border-t pt-2"><span class="font-bold">Grand Total:</span> <span id="pos-grandtotal" class="font-bold text-2xl">Rp 0</span></div><button onclick="app.savePOS()" class="bg-green-500 text-white font-bold py-3 px-8 rounded mt-6 w-1/3 shadow">Simpan Transaksi</button></div></div>`; window.posProdOpts = prodOpts; },
+            getPOSRow: function(opt) { return `<tr class="border-b pos-row"><td class="p-2"><select class="w-full border p-2 rounded pos-item-select" onchange="app.calcPOSRow(this)"><option value="">-- Pilih --</option>${opt}</select></td><td class="p-2"><input type="number" min="1" value="1" class="w-full border p-2 rounded pos-item-qty text-center" oninput="app.calcPOSRow(this)"></td><td class="p-2 text-right pos-item-price text-sm">0</td><td class="p-2 text-right font-bold pos-item-total text-sm">0</td><td class="p-2 text-center"><button onclick="this.closest('tr').remove(); app.calcPOSTotal();" class="text-red-400 p-1.5"><i class="fas fa-trash"></i></button></td></tr>`; },
+            addPOSRow: function() { document.getElementById('pos-tbody').insertAdjacentHTML('beforeend', this.getPOSRow(window.posProdOpts)); },
+            calcPOSRow: function(el) { const tr = el.closest('tr'); const sel = tr.querySelector('.pos-item-select'); const q = tr.querySelector('.pos-item-qty').value||0; let p = 0; if(sel.selectedIndex>0) p = sel.options[sel.selectedIndex].dataset.price; tr.querySelector('.pos-item-price').innerText = this.formatRp(p); tr.querySelector('.pos-item-price').dataset.val = p; const tot = p*q; tr.querySelector('.pos-item-total').innerText = this.formatRp(tot); tr.querySelector('.pos-item-total').dataset.val = tot; this.calcPOSTotal(); },
+            calcPOSTotal: function() { let sub=0; document.querySelectorAll('.pos-item-total').forEach(el=>sub+=Number(el.dataset.val||0)); document.getElementById('pos-subtotal').innerText=this.formatRp(sub); document.getElementById('pos-subtotal').dataset.val=sub; let d = Number(document.getElementById('pos-discount').value||0); let gt = sub-d; document.getElementById('pos-grandtotal').innerText=this.formatRp(gt); document.getElementById('pos-grandtotal').dataset.val=gt; },
+            savePOS: async function() { const items=[]; document.querySelectorAll('.pos-row').forEach(tr=>{ const sel=tr.querySelector('.pos-item-select'); if(sel.value) items.push({name:sel.value, qty:tr.querySelector('.pos-item-qty').value, price:tr.querySelector('.pos-item-price').dataset.val, total:tr.querySelector('.pos-item-total').dataset.val}); }); if(!items.length) return this.toast("Pilih produk!","error"); try { await this.api('saveSale', {date:document.getElementById('pos-date').value, buyer:document.getElementById('pos-buyer').value||'Umum', items:JSON.stringify(items), total:document.getElementById('pos-subtotal').dataset.val, diskon:document.getElementById('pos-discount').value||0, grandTotal:document.getElementById('pos-grandtotal').dataset.val}); this.toast("Tersimpan!"); await this.fetchInitialData(); this.renderPOS(); } catch(e){this.toast(e.message,"error");} },
+
+            renderProducts: function() { document.getElementById('module-title').innerText = "Data Produk"; const cats = ["Makanan Kucing", "Makanan Anjing", "Perlengkapan Hewan", "Klinik dan Obat-obatan", "Aset"]; let tbody=''; (this.state.data.Products||[]).forEach(p=>{ tbody+=`<tr class="border-b text-sm"><td class="p-2"><img src="${p.ImageURL}" class="w-10 h-10 object-cover border"></td><td class="p-2 font-medium">${p.Name}</td><td class="p-2">${p.Category}</td><td class="p-2 text-center font-bold">${p.Qty}</td><td class="p-2 text-right">${this.formatRp(p.HargaJual)}</td><td class="p-2 text-center"><button onclick='app.editProduct(${JSON.stringify(p)})' class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button><button onclick="app.deleteData('Products','${p.ID}')" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`; }); document.getElementById('admin-content').innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="bg-white p-6 rounded-xl shadow border h-fit"><h3 class="font-bold mb-4" id="prod-form-title">Tambah Produk</h3><form id="prod-form" onsubmit="app.saveProduct(event)"><input type="hidden" id="prod-id"><input type="hidden" id="prod-img-old"><div class="mb-3"><label class="block text-xs font-bold mb-1">Foto</label><input type="file" id="prod-img" class="w-full text-sm border p-1 rounded"></div><div class="mb-3"><label class="block text-xs font-bold mb-1">Nama</label><input type="text" id="prod-name" required class="w-full border p-2 rounded"></div><div class="mb-3"><label class="block text-xs font-bold mb-1">Kategori</label><select id="prod-cat" required class="w-full border p-2 rounded">${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="mb-3"><label class="block text-xs font-bold mb-1">Qty</label><input type="number" id="prod-qty" required class="w-full border p-2 rounded"></div><div class="grid grid-cols-2 gap-2 mb-4"><div><label class="block text-xs font-bold mb-1">H.Modal</label><input type="number" id="prod-hpp" required class="w-full border p-2 rounded"></div><div><label class="block text-xs font-bold mb-1">H.Jual</label><input type="number" id="prod-jual" required class="w-full border p-2 rounded"></div></div><button type="submit" class="bg-primary text-white py-2 px-4 rounded w-full font-bold">Simpan</button></form></div><div class="lg:col-span-2 bg-white rounded-xl shadow border p-6 overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-3">Pic</th><th class="p-3">Nama</th><th class="p-3">Kategori</th><th class="p-3 text-center">Stok</th><th class="p-3 text-right">Harga Jual</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`; },
+            editProduct: function(p) { document.getElementById('prod-form-title').innerText="Edit Produk"; document.getElementById('prod-id').value=p.ID; document.getElementById('prod-name').value=p.Name; document.getElementById('prod-cat').value=p.Category; document.getElementById('prod-qty').value=p.Qty; document.getElementById('prod-hpp').value=p.HargaModal; document.getElementById('prod-jual').value=p.HargaJual; document.getElementById('prod-img-old').value=p.ImageURL; },
+            saveProduct: async function(e) { e.preventDefault(); const fi = document.getElementById('prod-img'); const p = {id:document.getElementById('prod-id').value, name:document.getElementById('prod-name').value, category:document.getElementById('prod-cat').value, qty:document.getElementById('prod-qty').value, hargaModal:document.getElementById('prod-hpp').value, hargaJual:document.getElementById('prod-jual').value, imageStr:document.getElementById('prod-img-old').value}; if(fi.files.length>0) { const r = new FileReader(); r.onload=async(ev)=>{p.imageBase64=ev.target.result; p.fileName=fi.files[0].name; p.mimeType=fi.files[0].type; try{await this.api('saveProduct',p);this.toast("Tersimpan");await this.fetchInitialData();this.renderProducts();}catch(e){this.toast(e.message,"error");}}; r.readAsDataURL(fi.files[0]); } else { try{await this.api('saveProduct',p);this.toast("Tersimpan");await this.fetchInitialData();this.renderProducts();}catch(e){this.toast(e.message,"error");} } },
+
+            renderStock: function() { document.getElementById('module-title').innerText = "Tambah Stok"; const cats = ["Makanan Kucing", "Makanan Anjing", "Perlengkapan Hewan", "Klinik dan Obat-obatan", "Aset"]; let ht=''; (this.state.data.Stocks||[]).slice(-10).reverse().forEach(s=>{ ht+=`<tr class="border-b text-sm"><td class="p-2">${new Date(s.Date).toLocaleDateString('id-ID')}</td><td class="p-2">${s.Category}</td><td class="p-2 font-medium">${s.ProductName}</td><td class="p-2 text-center text-green-600 font-bold">+${s.QtyIn}</td></tr>`; }); document.getElementById('admin-content').innerHTML = `<div class="grid grid-cols-2 gap-6"><div class="bg-white p-6 rounded-xl border h-fit"><form onsubmit="app.saveStock(event)"><div class="mb-3"><label class="text-xs font-bold">Tanggal</label><input type="date" id="stk-date" required class="w-full border p-2 rounded" value="${new Date().toISOString().split('T')[0]}"></div><div class="mb-3"><label class="text-xs font-bold">Kategori</label><select id="stk-cat" required class="w-full border p-2 rounded" onchange="app.filterStockProd(this.value)"><option value="">Pilih</option>${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="mb-3"><label class="text-xs font-bold">Produk</label><select id="stk-prod" required class="w-full border p-2 rounded"></select></div><div class="mb-5"><label class="text-xs font-bold">Qty Masuk</label><input type="number" id="stk-qty" required min="1" class="w-full border p-2 rounded"></div><button type="submit" class="bg-blue-500 text-white py-2 rounded w-full font-bold">Simpan</button></form></div><div class="bg-white p-6 rounded-xl border"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-2">Tgl</th><th class="p-2">Kat</th><th class="p-2">Produk</th><th class="p-2">Qty</th></tr></thead><tbody>${ht}</tbody></table></div></div>`; },
+            filterStockProd: function(cat) { const p=this.state.data.Products.filter(x=>x.Category===cat); document.getElementById('stk-prod').innerHTML=p.map(x=>`<option value="${x.Name}">${x.Name}</option>`).join(''); },
+            saveStock: async function(e) { e.preventDefault(); try{await this.api('saveStock',{date:document.getElementById('stk-date').value,category:document.getElementById('stk-cat').value,productName:document.getElementById('stk-prod').value,qtyIn:document.getElementById('stk-qty').value}); this.toast("Ditambah");await this.fetchInitialData();this.renderStock();}catch(e){this.toast(e.message,"error");} },
+
+            renderExpense: function() { document.getElementById('module-title').innerText = "Pengeluaran"; const dets=["Iklan","Belanja Modal","Gaji","Listrik","Wifi","Air","Lainnya"]; document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl border max-w-xl mx-auto"><form onsubmit="app.saveExpense(event)"><div class="grid grid-cols-2 gap-4 mb-4"><div><label class="text-xs font-bold">Tanggal</label><input type="date" id="exp-date" required class="w-full border p-2 rounded" value="${new Date().toISOString().split('T')[0]}"></div><div><label class="text-xs font-bold">Kategori</label><select id="exp-detail" required class="w-full border p-2 rounded" onchange="document.getElementById('exp-other').classList.toggle('hide',this.value!=='Lainnya')">${dets.map(d=>`<option value="${d}">${d}</option>`).join('')}</select><input type="text" id="exp-other" class="w-full border p-2 rounded mt-2 hide"></div></div><div class="mb-4"><label class="text-xs font-bold">Vendor/Penerima</label><input type="text" id="exp-vendor" required class="w-full border p-2 rounded"></div><div class="grid grid-cols-2 gap-4 mb-5"><div><label class="text-xs font-bold">Qty</label><input type="number" id="exp-qty" required value="1" class="w-full border p-2 rounded" oninput="app.calcExp()"></div><div><label class="text-xs font-bold">Nominal (Rp)</label><input type="number" id="exp-nom" required class="w-full border p-2 rounded" oninput="app.calcExp()"></div></div><div class="mb-6 p-4 bg-red-50 rounded-lg text-right"><span class="font-bold text-red-800">Total: </span><span id="exp-total" class="text-2xl text-red-600 font-bold ml-2">Rp 0</span></div><button type="submit" class="bg-red-500 text-white py-3 rounded w-full font-bold">Catat Pengeluaran</button></form></div>`; },
+            calcExp: function() { document.getElementById('exp-total').innerText = this.formatRp((document.getElementById('exp-qty').value||0)*(document.getElementById('exp-nom').value||0)); },
+            saveExpense: async function(e) { e.preventDefault(); let det=document.getElementById('exp-detail').value; if(det==='Lainnya')det=document.getElementById('exp-other').value||'Lainnya'; const q=document.getElementById('exp-qty').value; const n=document.getElementById('exp-nom').value; try{await this.api('saveExpense',{date:document.getElementById('exp-date').value,detail:det,vendor:document.getElementById('exp-vendor').value,qty:q,nominal:n,total:q*n});this.toast("Tersimpan");await this.fetchInitialData();this.renderExpense();}catch(e){this.toast(e.message,"error");} },
+
+            renderReportTrx: function() { document.getElementById('module-title').innerText = "Laporan Transaksi"; let tbody=''; (this.state.data.Sales||[]).forEach(s=>{tbody+=`<tr class="border-b"><td class="p-3">${new Date(s.Date).toLocaleDateString('id-ID')}</td><td class="p-3">${s.Buyer}</td><td class="p-3 text-right font-bold text-green-600">${this.formatRp(s.GrandTotal)}</td><td class="p-3 text-center"><button onclick="app.deleteData('Sales','${s.ID}')" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;}); document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl shadow border"><div class="flex justify-end mb-4"><button onclick="app.exportPDF('rep-trx-area','Penjualan')" class="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded mr-2"><i class="fas fa-file-pdf"></i> PDF</button><button onclick="app.exportCSV('Sales')" class="bg-green-50 text-green-600 border border-green-200 px-3 py-1.5 rounded"><i class="fas fa-file-csv"></i> CSV</button></div><div id="rep-trx-area"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase"><tr><th class="p-3">Tanggal</th><th class="p-3">Customer</th><th class="p-3 text-right">Nominal</th><th class="p-3 text-center" data-html2canvas-ignore>Aksi</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`; },
+            renderReportFin: function() { document.getElementById('module-title').innerText = "Laporan Keuangan"; let inC=0, outC=0; (this.state.data.Sales||[]).forEach(s=>inC+=Number(s.GrandTotal)); (this.state.data.Expenses||[]).forEach(e=>outC+=Number(e.Total)); document.getElementById('admin-content').innerHTML = `<div class="flex justify-end mb-4"><button onclick="app.exportPDF('rep-fin-area','Keuangan')" class="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded"><i class="fas fa-file-pdf"></i> PDF</button></div><div class="grid grid-cols-3 gap-4 mb-6"><div class="bg-white p-5 rounded-xl border-t-4 border-green-500"><p class="text-xs text-gray-500 uppercase">Total Omset</p><h3 class="text-xl font-bold text-green-600">${this.formatRp(inC)}</h3></div><div class="bg-white p-5 rounded-xl border-t-4 border-red-500"><p class="text-xs text-gray-500 uppercase">Total Pengeluaran</p><h3 class="text-xl font-bold text-red-600">${this.formatRp(outC)}</h3></div><div class="bg-white p-5 rounded-xl border-t-4 border-blue-500"><p class="text-xs text-gray-500 uppercase">Laba Bersih</p><h3 class="text-xl font-bold text-blue-600">${this.formatRp(inC-outC)}</h3></div></div><div class="bg-white p-6 rounded-xl shadow border" id="rep-fin-area"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase"><tr><th class="p-3">Tgl</th><th class="p-3">Ket</th><th class="p-3 text-right">Total</th><th class="p-3 text-center" data-html2canvas-ignore>Aksi</th></tr></thead><tbody>${(this.state.data.Expenses||[]).map(e=>`<tr class="border-b"><td>${new Date(e.Date).toLocaleDateString('id-ID')}</td><td>${e.Detail}</td><td class="text-right">${this.formatRp(e.Total)}</td><td class="text-center" data-html2canvas-ignore><button onclick="app.deleteData('Expenses','${e.ID}')" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div>`; },
+            renderUsers: function() { document.getElementById('module-title').innerText = "Manajemen User"; let tbody=''; (this.state.data.Users||[]).forEach(u=>{tbody+=`<tr class="border-b"><td class="p-3">${u.Username}</td><td class="p-3">${u.Role}</td><td class="p-3 text-center"><button onclick="app.deleteData('Users','${u.ID}')" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`;}); document.getElementById('admin-content').innerHTML = `<div class="grid grid-cols-3 gap-6"><div class="bg-white p-6 rounded-xl border h-fit"><form onsubmit="app.saveUser(event)"><div class="mb-3"><input type="text" id="usr-name" placeholder="Username" required class="w-full border p-2.5 rounded"></div><div class="mb-3"><input type="password" id="usr-pass" placeholder="Password" required class="w-full border p-2.5 rounded"></div><div class="mb-5"><select id="usr-role" class="w-full border p-2.5 rounded"><option value="Kasir">Kasir</option><option value="Admin">Admin</option></select></div><button type="submit" class="bg-gray-800 text-white py-2.5 w-full rounded">Simpan</button></form></div><div class="col-span-2 bg-white p-6 rounded-xl border"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase"><tr><th class="p-3">Username</th><th class="p-3">Role</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`; },
+            saveUser: async function(e) { e.preventDefault(); try{await this.api('saveUser',{username:document.getElementById('usr-name').value,password:document.getElementById('usr-pass').value,role:document.getElementById('usr-role').value});this.toast("Tersimpan");await this.fetchInitialData();this.renderUsers();}catch(e){this.toast(e.message,"error");} },
+
+            deleteData: async function(sheet, id) { if(!confirm("Yakin hapus?")) return; try{await this.api('deleteData',{sheet,id});this.toast("Terhapus");await this.fetchInitialData();if(sheet==='Products')this.renderProducts();else if(sheet==='Articles')this.renderAdminArticles();else if(sheet==='Users')this.renderUsers();else if(sheet==='Sales')this.renderReportTrx();else if(sheet==='Expenses')this.renderReportFin();}catch(e){this.toast(e.message,"error");} },
+            exportPDF: function(id, name) { html2pdf().set({ margin: 0.5, filename: name+'.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(document.getElementById(id)).save(); },
+            exportCSV: function(sheet) { const data = this.state.data[sheet]; if(!data || !data.length) return this.toast("Data kosong", "error"); const blob = new Blob([[Object.keys(data[0]).join(','), ...data.map(r => Object.keys(data[0]).map(f => `"${r[f] || ''}"`).join(','))].join('\r\n')], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = sheet + ".csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        };
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
