@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cilegon Petshop v.1</title>
-    <link rel="icon" href="logo.jpg">
+    <link rel="icon" href="logo.png">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,12 +18,10 @@
         }
     </script>
     
-    <!-- External Libs -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <!-- Quill Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
@@ -40,7 +37,6 @@
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .banner-zoom:hover img { transform: scale(1.05); }
         .banner-zoom img { transition: transform 0.3s ease; }
-        /* Quill Editor overrides */
         .ql-container { font-family: 'Poppins', sans-serif !important; min-height: 200px; }
         .article-body h1, .article-body h2 { font-weight: bold; margin-bottom: 10px; }
         .article-body p { margin-bottom: 15px; }
@@ -49,35 +45,26 @@
 </head>
 <body class="text-gray-800 flex flex-col min-h-screen">
 
-    <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-80 z-[9999] hide flex flex-col justify-center items-center">
         <i class="fas fa-paw animate-bounce text-primary text-6xl"></i>
         <p class="mt-4 font-semibold text-primary">Memproses Data...</p>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
     <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 rounded-full text-white font-semibold shadow-lg hide"></div>
 
-    <!-- FLOATING WA BUTTON -->
     <a href="https://wa.me/6281234567890" target="_blank" class="fixed bottom-20 right-5 bg-green-500 text-white p-4 rounded-full shadow-xl hover:bg-green-600 transition z-50 flex items-center justify-center w-14 h-14" id="btn-wa">
         <i class="fab fa-whatsapp text-3xl"></i>
     </a>
 
-    <!-- ==============================================
-         VIEW 1: PUBLIC LANDING PAGE
-    =============================================== -->
     <div id="view-public" class="flex-grow flex flex-col pb-0">
         
-        <!-- Top Navbar -->
         <nav class="bg-white sticky top-0 z-40 border-b border-gray-200 shadow-sm relative">
             <div class="container mx-auto px-4 py-4 flex items-center justify-between">
                 
-                <!-- Logo -->
                 <div class="flex items-center gap-2 cursor-pointer" onclick="app.showPublicView('home')">
                     <img src="logo.png" alt="CilegonPet" class="h-10 object-contain" onerror="this.src='https://via.placeholder.com/150/fa338e/ffffff?text=Logo'">
                 </div>
                 
-                <!-- Menu Center (Desktop) -->
                 <div class="hidden md:flex items-center gap-6 font-medium text-gray-600">
                     <a href="#" onclick="app.showPublicView('home')" class="hover:text-primary transition">Beranda</a>
                     <a href="#" onclick="app.showPublicView('promo')" class="hover:text-primary transition">Promo</a>
@@ -85,7 +72,6 @@
                     <a href="#" onclick="app.showPublicView('about')" class="hover:text-primary transition">Tentang Kami</a>
                 </div>
 
-                <!-- Right Actions (Icons Only) -->
                 <div class="flex items-center gap-5 text-xl text-gray-600">
                     <div class="relative">
                         <button onclick="document.getElementById('search-dropdown').classList.toggle('hide')" class="hover:text-primary transition">
@@ -107,12 +93,10 @@
                 </div>
             </div>
 
-            <!-- Red Promo Bar -->
             <div class="bg-red-50 text-center py-1.5 border-b border-red-100 cursor-pointer hover:bg-red-100 transition" onclick="app.showPublicView('promo')">
                 <span class="text-red-600 text-xs md:text-sm font-semibold" id="cms-PromoText">Diskon Spesial Hari Ini! Klik untuk lihat Promo ></span>
             </div>
             
-            <!-- Category Menu Bar (Only visible in home) -->
             <div id="home-category-bar" class="container mx-auto px-4 py-2 hidden md:flex items-center gap-6 text-sm text-gray-600 font-medium overflow-x-auto whitespace-nowrap">
                 <a href="#" onclick="app.filterPublicProducts('Semua')" class="hover:text-primary text-primary border-b-2 border-primary pb-1"><i class="fas fa-bars mr-1"></i> Semua</a>
                 <a href="#" onclick="app.filterPublicProducts('Makanan Kucing')" class="hover:text-primary pb-1">Makanan Kucing</a>
@@ -122,11 +106,7 @@
             </div>
         </nav>
 
-        <!-- ==========================================
-             PUBLIC: HOME VIEW
-        =========================================== -->
         <div id="public-home-view" class="public-view flex-grow">
-            <!-- Main Banner & Hero -->
             <section id="banners" class="container mx-auto px-4 mt-6">
                 <h1 id="cms-HeroTitle" class="text-2xl font-bold text-gray-800 mb-4 hidden md:block">Selamat Datang di Cilegon Petshop</h1>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -158,7 +138,6 @@
                 </div>
             </section>
 
-            <!-- Product Grid Section -->
             <section id="categories" class="container mx-auto px-4 py-10">
                 <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800" id="product-section-title">Semua Produk</h2>
@@ -166,7 +145,6 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" id="public-product-grid"></div>
             </section>
 
-            <!-- Home Articles Preview Section -->
             <section id="home-articles" class="container mx-auto px-4 py-8 mb-10">
                 <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-2">
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800">Artikel & Tips Terbaru</h2>
@@ -179,10 +157,7 @@
                 </div>
             </section>
         </div>
-https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjdkK8gIGKolcAC_zM7etvDAFkPwn8/exec
-        <!-- ==========================================
-             PUBLIC: PROMO VIEW
-        =========================================== -->
+
         <div id="public-promo-view" class="public-view flex-grow hide container mx-auto px-4 py-10 pb-16">
             <h2 class="text-3xl font-bold text-primary mb-6"><i class="fas fa-tag mr-2"></i> Promo & Penawaran</h2>
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-red-100 text-center">
@@ -193,9 +168,6 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
             </div>
         </div>
 
-        <!-- ==========================================
-             PUBLIC: ABOUT VIEW
-        =========================================== -->
         <div id="public-about-view" class="public-view flex-grow hide container mx-auto px-4 py-10 pb-16">
             <h2 class="text-3xl font-bold text-primary mb-6">Tentang Kami</h2>
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-8 items-center">
@@ -216,17 +188,11 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
             </div>
         </div>
 
-        <!-- ==========================================
-             PUBLIC: ARTICLES LIST VIEW
-        =========================================== -->
         <div id="public-articles-view" class="public-view flex-grow hide container mx-auto px-4 py-10 pb-16">
             <h2 class="text-3xl font-bold text-primary mb-6"><i class="fas fa-newspaper mr-2"></i> Semua Artikel & Tips</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="public-articles-grid"></div>
         </div>
 
-        <!-- ==========================================
-             PUBLIC: ARTICLE DETAIL VIEW
-        =========================================== -->
         <div id="public-article-detail-view" class="public-view flex-grow hide container mx-auto px-4 py-10 max-w-4xl pb-16">
             <button onclick="app.showPublicView('articles')" class="text-primary font-medium mb-6 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar Artikel</button>
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
@@ -237,17 +203,11 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
             </div>
         </div>
 
-        <!-- ==========================================
-             MODERN NEW FOOTER (Pink Background)
-        =========================================== -->
         <footer class="bg-primary text-white mt-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
             <div class="container mx-auto px-6 py-12 md:py-16">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16">
-                    
-                    <!-- Left Section: Logo, Tagline, Button -->
                     <div class="md:col-span-12 lg:col-span-5 flex flex-col items-start">
                         <div class="flex items-center gap-3 mb-6 cursor-pointer" onclick="app.showPublicView('home')">
-                            <!-- Use a white filter or specific logo if needed, otherwise rely on alt text or CSS filters -->
                             <img src="logo.png" alt="CilegonPet Logo" class="h-8 object-contain bg-white rounded-md p-1" onerror="this.src='https://via.placeholder.com/150/ffffff/fa338e?text=Logo'">
                             <span class="font-bold text-2xl tracking-tight">CilegonPet.</span>
                         </div>
@@ -259,11 +219,7 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
                             </span>
                         </a>
                     </div>
-
-                    <!-- Right Section: Columns -->
                     <div class="md:col-span-12 lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
-                        
-                        <!-- Layanan -->
                         <div>
                             <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Layanan</h4>
                             <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
@@ -273,8 +229,6 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
                                 <li><a href="#" class="hover:text-white transition">Klinik</a></li>
                             </ul>
                         </div>
-                        
-                        <!-- Informasi -->
                         <div>
                             <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Informasi</h4>
                             <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
@@ -284,8 +238,6 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
                                 <li><a href="#" class="hover:text-white transition">Lokasi</a></li>
                             </ul>
                         </div>
-                        
-                        <!-- Kebijakan -->
                         <div>
                             <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Kebijakan</h4>
                             <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
@@ -295,8 +247,6 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
                                 <li><a href="#" class="hover:text-white transition">FAQ</a></li>
                             </ul>
                         </div>
-                        
-                        <!-- Connect / Social -->
                         <div>
                             <h4 class="font-bold mb-5 border-l-2 border-white pl-3 text-lg">Connect</h4>
                             <ul class="space-y-3.5 text-sm text-pink-100 font-medium">
@@ -309,8 +259,6 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
                         </div>
                     </div>
                 </div>
-
-                <!-- Bottom Row -->
                 <div class="border-t border-pink-400 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-pink-200 font-medium gap-6">
                     <div class="flex flex-wrap justify-center gap-6">
                         <a href="#" class="hover:text-white transition">Privacy Policy</a>
@@ -323,12 +271,8 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
                 </div>
             </div>
         </footer>
-
     </div>
 
-    <!-- ==============================================
-         VIEW 2: LOGIN PAGE (WITH BYPASS)
-    =============================================== -->
     <div id="view-login" class="min-h-screen flex items-center justify-center bg-gray-100 hide relative">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 z-10">
             <div class="text-center mb-8">
@@ -367,9 +311,6 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
         </div>
     </div>
 
-    <!-- ==============================================
-         VIEW 3: CPANEL / ADMIN DASHBOARD
-    =============================================== -->
     <div id="view-admin" class="min-h-screen bg-gray-100 flex hide">
         <aside id="sidebar" class="bg-white w-64 shadow-xl flex-shrink-0 transition-transform duration-300 fixed md:relative z-50 h-full transform -translate-x-full md:translate-x-0 border-r border-gray-200">
             <div class="p-5 flex items-center justify-between border-b">
@@ -420,12 +361,34 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjdkK8gIGKolcAC_zM7etvDAFkPwn8/exec"; 
+        // MASUKKAN URL APP SCRIPT ANDA DI DALAM TANDA KUTIP DI BAWAH INI (HANYA DI SINI):
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRllE8zYV2hEoC-g1gwm9o7qKxvjdkK8gIGKolcAC_zM7etvDAFkPwn8/exec"; 
         
         const app = {
             state: { user: null, data: { Users: [], Products: [], Sales: [], Stocks: [], Expenses: [], LandingCMS: {}, Articles: [] }, currentPublicCategory: 'Semua', quillInstance: null },
             init: async function() { const loggedUser = localStorage.getItem('petshopUser'); if(loggedUser) this.state.user = JSON.parse(loggedUser); await this.fetchInitialData(); this.navigate(this.state.user ? 'admin' : 'public'); },
-            api: async function(action, payload) { this.showLoading(); try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: action, payload: payload }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); const result = await res.json(); this.hideLoading(); if(result.status === 'success') return result.data; else throw new Error(result.message); } catch(e) { this.hideLoading(); this.toast(e.message || "Error Jaringan", "error"); throw e; } },
+            
+            api: async function(action, payload) { 
+                if(!GAS_URL) { this.toast("Error: GAS_URL kosong. Harap isi URL App Script Anda di kode.", "error"); throw new Error("No URL"); }
+                this.showLoading(); 
+                try { 
+                    const res = await fetch(GAS_URL, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: action, payload: payload }), 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        redirect: 'follow' 
+                    }); 
+                    const result = await res.json(); 
+                    this.hideLoading(); 
+                    if(result.status === 'success') return result.data; 
+                    else throw new Error(result.message); 
+                } catch(e) { 
+                    this.hideLoading(); 
+                    this.toast("Koneksi Gagal. Pastikan URL benar & Foto < 2MB", "error"); 
+                    throw e; 
+                } 
+            },
+            
             fetchInitialData: async function() { try { const data = await this.api('getData', { sheets: ['Products', 'Users', 'Sales', 'Stocks', 'Expenses', 'Articles', 'LandingCMS'] }); this.state.data = Object.assign(this.state.data, data); } catch(e) { console.log(e); } },
             showLoading: () => document.getElementById('loadingOverlay').classList.remove('hide'), hideLoading: () => document.getElementById('loadingOverlay').classList.add('hide'),
             toast: function(msg, type="success") { const el = document.getElementById('toast'); el.textContent = msg; el.className = `fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[9999] px-6 py-3 rounded-full text-white font-semibold shadow-lg toast-show ${type==='success' ? 'bg-green-500' : 'bg-red-500'}`; el.classList.remove('hide'); setTimeout(() => el.classList.add('hide'), 3000); },
@@ -482,7 +445,27 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
             loadModule: function(mod) { document.querySelectorAll('.admin-menu').forEach(el => { if(el.dataset.target === mod) { el.classList.add('bg-pink-50', 'text-primary'); el.classList.remove('text-gray-600'); } else { el.classList.remove('bg-pink-50', 'text-primary'); el.classList.add('text-gray-600'); } }); if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full'); const content = document.getElementById('admin-content'); if(this.state.user.Role === 'Kasir' && ['users', 'products', 'cms', 'rep-trx', 'rep-fin', 'articles'].includes(mod)) { content.innerHTML = `<div class="text-center py-20 text-red-500 bg-white rounded-xl shadow"><i class="fas fa-ban text-5xl mb-4"></i><h2 class="text-xl font-bold">Akses Ditolak</h2></div>`; return; } if(mod === 'pos') this.renderPOS(); else if(mod === 'stock') this.renderStock(); else if(mod === 'expense') this.renderExpense(); else if(mod === 'products') this.renderProducts(); else if(mod === 'users') this.renderUsers(); else if(mod === 'cms') this.renderCMS(); else if(mod === 'rep-trx') this.renderReportTrx(); else if(mod === 'rep-fin') this.renderReportFin(); else if(mod === 'articles') this.renderAdminArticles(); },
             
             renderAdminArticles: function() { document.getElementById('module-title').innerText = "Kelola Artikel & Blog"; let tbody = ''; (this.state.data.Articles||[]).forEach(a => { tbody += `<tr class="border-b"><td class="p-3"><img src="${a.ImageURL||'https://via.placeholder.com/50'}" class="w-12 h-10 object-cover rounded"></td><td class="p-3 font-medium">${a.Title}</td><td class="p-3 text-sm text-gray-500">${new Date(a.Date).toLocaleDateString('id-ID')}</td><td class="p-3 text-center"><button onclick="app.deleteData('Articles', '${a.ID}')" class="text-red-500 bg-red-50 p-1.5 rounded"><i class="fas fa-trash"></i></button></td></tr>`; }); document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6"><h3 class="font-bold mb-4 text-gray-800">Tulis Artikel Baru</h3><form onsubmit="app.saveArticle(event)"><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label class="text-xs font-bold text-gray-600">Judul Artikel</label><input type="text" id="art-title" required class="w-full border p-2.5 rounded-lg outline-none focus:border-primary"></div><div><label class="text-xs font-bold text-gray-600">Upload Banner/Gambar</label><input type="file" id="art-img" accept="image/*" class="w-full border p-2 rounded-lg text-sm"></div></div><div class="mb-4"><label class="text-xs font-bold text-gray-600 mb-2 block">Isi Konten (Rich Text)</label><div id="quill-editor" class="bg-white rounded-b-lg"></div></div><button type="submit" class="bg-primary text-white py-2.5 px-6 rounded-lg font-bold hover:bg-secondary transition">Publikasikan Artikel</button></form></div><div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100"><h3 class="font-bold mb-4 text-gray-800">Daftar Artikel</h3><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-3 w-16">Img</th><th class="p-3">Judul</th><th class="p-3">Tanggal</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`; setTimeout(() => { this.state.quillInstance = new Quill('#quill-editor', { theme: 'snow', placeholder: 'Tulis isi artikel yang menarik di sini...', modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image'], ['clean'] ] } }); }, 50); },
-            saveArticle: async function(e) { e.preventDefault(); const content = this.state.quillInstance.root.innerHTML; if(content === '<p><br></p>') return this.toast("Isi artikel tidak boleh kosong", "error"); const fileInput = document.getElementById('art-img'); const payload = { title: document.getElementById('art-title').value, content: content }; if (fileInput.files.length > 0) { const reader = new FileReader(); reader.onload = async (ev) => { payload.imageBase64 = ev.target.result; payload.fileName = fileInput.files[0].name; payload.mimeType = fileInput.files[0].type; await this.sendArtSave(payload); }; reader.readAsDataURL(fileInput.files[0]); } else await this.sendArtSave(payload); },
+            
+            saveArticle: async function(e) { 
+                e.preventDefault(); 
+                const content = this.state.quillInstance.root.innerHTML; 
+                if(content === '<p><br></p>') return this.toast("Isi artikel tidak boleh kosong", "error"); 
+                
+                const fileInput = document.getElementById('art-img'); 
+                if (fileInput.files.length > 0 && fileInput.files[0].size > 2 * 1024 * 1024) return this.toast("Gagal: Ukuran foto maksimal 2MB!", "error");
+                
+                const payload = { title: document.getElementById('art-title').value, content: content }; 
+                if (fileInput.files.length > 0) { 
+                    const reader = new FileReader(); 
+                    reader.onload = async (ev) => { 
+                        payload.imageBase64 = ev.target.result; 
+                        payload.fileName = fileInput.files[0].name; 
+                        payload.mimeType = fileInput.files[0].type; 
+                        await this.sendArtSave(payload); 
+                    }; 
+                    reader.readAsDataURL(fileInput.files[0]); 
+                } else await this.sendArtSave(payload); 
+            },
             sendArtSave: async function(payload) { try { await this.api('saveArticle', payload); this.toast("Artikel dipublikasikan!"); await this.fetchInitialData(); this.renderAdminArticles(); } catch(e) { this.toast(e.message, "error"); } },
             
             renderCMS: function() { document.getElementById('module-title').innerText = "Tampilan Depan (CMS)"; const cms = this.state.data.LandingCMS || {}; document.getElementById('admin-content').innerHTML = `<div class="bg-white p-6 rounded-xl shadow-sm border max-w-2xl mx-auto"><form onsubmit="app.saveCMS(event)"><div class="mb-4"><label class="block text-xs font-bold text-gray-600 mb-1">Teks Banner Utama</label><input type="text" id="cms-hero" class="w-full border p-2.5 rounded-lg outline-none focus:border-primary" value="${cms.HeroTitle||''}"></div><div class="mb-4"><label class="block text-xs font-bold text-gray-600 mb-1">Teks Flash Promo (Header Merah)</label><input type="text" id="cms-promo" class="w-full border p-2.5 rounded-lg outline-none focus:border-primary" value="${cms.PromoText||''}"></div><div class="mb-5"><label class="block text-xs font-bold text-gray-600 mb-1">Deskripsi Laman Tentang Kami</label><textarea id="cms-about" class="w-full border p-2.5 rounded-lg outline-none focus:border-primary" rows="4">${cms.AboutText||''}</textarea></div><button type="submit" class="bg-primary text-white py-3 px-4 rounded-lg w-full font-bold shadow hover:bg-secondary">Simpan Landing Page</button></form></div>`; },
@@ -497,7 +480,18 @@ https://script.google.com/macros/s/AKfycbyMjv3TVLhJlRlIE8zYV2hEoC-g1gwm9o7qKxvjd
 
             renderProducts: function() { document.getElementById('module-title').innerText = "Data Produk"; const cats = ["Makanan Kucing", "Makanan Anjing", "Perlengkapan Hewan", "Klinik dan Obat-obatan", "Aset"]; let tbody=''; (this.state.data.Products||[]).forEach(p=>{ tbody+=`<tr class="border-b text-sm"><td class="p-2"><img src="${p.ImageURL}" class="w-10 h-10 object-cover border"></td><td class="p-2 font-medium">${p.Name}</td><td class="p-2">${p.Category}</td><td class="p-2 text-center font-bold">${p.Qty}</td><td class="p-2 text-right">${this.formatRp(p.HargaJual)}</td><td class="p-2 text-center"><button onclick='app.editProduct(${JSON.stringify(p)})' class="text-blue-500 mr-2"><i class="fas fa-edit"></i></button><button onclick="app.deleteData('Products','${p.ID}')" class="text-red-500"><i class="fas fa-trash"></i></button></td></tr>`; }); document.getElementById('admin-content').innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="bg-white p-6 rounded-xl shadow border h-fit"><h3 class="font-bold mb-4" id="prod-form-title">Tambah Produk</h3><form id="prod-form" onsubmit="app.saveProduct(event)"><input type="hidden" id="prod-id"><input type="hidden" id="prod-img-old"><div class="mb-3"><label class="block text-xs font-bold mb-1">Foto</label><input type="file" id="prod-img" class="w-full text-sm border p-1 rounded"></div><div class="mb-3"><label class="block text-xs font-bold mb-1">Nama</label><input type="text" id="prod-name" required class="w-full border p-2 rounded"></div><div class="mb-3"><label class="block text-xs font-bold mb-1">Kategori</label><select id="prod-cat" required class="w-full border p-2 rounded">${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="mb-3"><label class="block text-xs font-bold mb-1">Qty</label><input type="number" id="prod-qty" required class="w-full border p-2 rounded"></div><div class="grid grid-cols-2 gap-2 mb-4"><div><label class="block text-xs font-bold mb-1">H.Modal</label><input type="number" id="prod-hpp" required class="w-full border p-2 rounded"></div><div><label class="block text-xs font-bold mb-1">H.Jual</label><input type="number" id="prod-jual" required class="w-full border p-2 rounded"></div></div><button type="submit" class="bg-primary text-white py-2 px-4 rounded w-full font-bold">Simpan</button></form></div><div class="lg:col-span-2 bg-white rounded-xl shadow border p-6 overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-3">Pic</th><th class="p-3">Nama</th><th class="p-3">Kategori</th><th class="p-3 text-center">Stok</th><th class="p-3 text-right">Harga Jual</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody>${tbody}</tbody></table></div></div>`; },
             editProduct: function(p) { document.getElementById('prod-form-title').innerText="Edit Produk"; document.getElementById('prod-id').value=p.ID; document.getElementById('prod-name').value=p.Name; document.getElementById('prod-cat').value=p.Category; document.getElementById('prod-qty').value=p.Qty; document.getElementById('prod-hpp').value=p.HargaModal; document.getElementById('prod-jual').value=p.HargaJual; document.getElementById('prod-img-old').value=p.ImageURL; },
-            saveProduct: async function(e) { e.preventDefault(); const fi = document.getElementById('prod-img'); const p = {id:document.getElementById('prod-id').value, name:document.getElementById('prod-name').value, category:document.getElementById('prod-cat').value, qty:document.getElementById('prod-qty').value, hargaModal:document.getElementById('prod-hpp').value, hargaJual:document.getElementById('prod-jual').value, imageStr:document.getElementById('prod-img-old').value}; if(fi.files.length>0) { const r = new FileReader(); r.onload=async(ev)=>{p.imageBase64=ev.target.result; p.fileName=fi.files[0].name; p.mimeType=fi.files[0].type; try{await this.api('saveProduct',p);this.toast("Tersimpan");await this.fetchInitialData();this.renderProducts();}catch(e){this.toast(e.message,"error");}}; r.readAsDataURL(fi.files[0]); } else { try{await this.api('saveProduct',p);this.toast("Tersimpan");await this.fetchInitialData();this.renderProducts();}catch(e){this.toast(e.message,"error");} } },
+            saveProduct: async function(e) { 
+                e.preventDefault(); 
+                const fi = document.getElementById('prod-img'); 
+                if (fi.files.length > 0 && fi.files[0].size > 2 * 1024 * 1024) return this.toast("Gagal: Ukuran foto maksimal 2MB!", "error");
+                
+                const p = {id:document.getElementById('prod-id').value, name:document.getElementById('prod-name').value, category:document.getElementById('prod-cat').value, qty:document.getElementById('prod-qty').value, hargaModal:document.getElementById('prod-hpp').value, hargaJual:document.getElementById('prod-jual').value, imageStr:document.getElementById('prod-img-old').value}; 
+                if(fi.files.length>0) { 
+                    const r = new FileReader(); r.onload=async(ev)=>{p.imageBase64=ev.target.result; p.fileName=fi.files[0].name; p.mimeType=fi.files[0].type; try{await this.api('saveProduct',p);this.toast("Tersimpan");await this.fetchInitialData();this.renderProducts();}catch(e){this.toast(e.message,"error");}}; r.readAsDataURL(fi.files[0]); 
+                } else { 
+                    try{await this.api('saveProduct',p);this.toast("Tersimpan");await this.fetchInitialData();this.renderProducts();}catch(e){this.toast(e.message,"error");} 
+                } 
+            },
 
             renderStock: function() { document.getElementById('module-title').innerText = "Tambah Stok"; const cats = ["Makanan Kucing", "Makanan Anjing", "Perlengkapan Hewan", "Klinik dan Obat-obatan", "Aset"]; let ht=''; (this.state.data.Stocks||[]).slice(-10).reverse().forEach(s=>{ ht+=`<tr class="border-b text-sm"><td class="p-2">${new Date(s.Date).toLocaleDateString('id-ID')}</td><td class="p-2">${s.Category}</td><td class="p-2 font-medium">${s.ProductName}</td><td class="p-2 text-center text-green-600 font-bold">+${s.QtyIn}</td></tr>`; }); document.getElementById('admin-content').innerHTML = `<div class="grid grid-cols-2 gap-6"><div class="bg-white p-6 rounded-xl border h-fit"><form onsubmit="app.saveStock(event)"><div class="mb-3"><label class="text-xs font-bold">Tanggal</label><input type="date" id="stk-date" required class="w-full border p-2 rounded" value="${new Date().toISOString().split('T')[0]}"></div><div class="mb-3"><label class="text-xs font-bold">Kategori</label><select id="stk-cat" required class="w-full border p-2 rounded" onchange="app.filterStockProd(this.value)"><option value="">Pilih</option>${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="mb-3"><label class="text-xs font-bold">Produk</label><select id="stk-prod" required class="w-full border p-2 rounded"></select></div><div class="mb-5"><label class="text-xs font-bold">Qty Masuk</label><input type="number" id="stk-qty" required min="1" class="w-full border p-2 rounded"></div><button type="submit" class="bg-blue-500 text-white py-2 rounded w-full font-bold">Simpan</button></form></div><div class="bg-white p-6 rounded-xl border"><table class="w-full text-left"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="p-2">Tgl</th><th class="p-2">Kat</th><th class="p-2">Produk</th><th class="p-2">Qty</th></tr></thead><tbody>${ht}</tbody></table></div></div>`; },
             filterStockProd: function(cat) { const p=this.state.data.Products.filter(x=>x.Category===cat); document.getElementById('stk-prod').innerHTML=p.map(x=>`<option value="${x.Name}">${x.Name}</option>`).join(''); },
